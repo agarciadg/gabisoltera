@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Snoopy's Party Game</title>
+    <title>Snoopy's Party Game - Gabi</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
 
         * {
             box-sizing: border-box;
-            touch-action: manipulation; /* Evita zoom accidental al tocar rápido */
+            touch-action: manipulation;
         }
 
         body {
@@ -29,12 +29,12 @@
             position: relative;
             width: 100%;
             max-width: 800px;
-            aspect-ratio: 2 / 1; /* Mantiene la proporción estilo cómic */
+            aspect-ratio: 2 / 1;
             margin: 10px;
         }
 
         canvas {
-            background-color: #89CFF0;
+            background-color: #89CFF0; /* Azul cielo Peanuts */
             border: 3px solid #000;
             border-radius: 4px;
             width: 100%;
@@ -43,6 +43,7 @@
             image-rendering: crisp-edges;
         }
 
+        /* Estilo base para todas las pantallas superpuestas */
         .pantalla-mensaje {
             position: absolute;
             top: 50%;
@@ -51,35 +52,50 @@
             width: 90%;
             max-height: 90%;
             background: rgba(255, 255, 255, 0.98);
-            padding: 20px;
-            border: 3px solid #000;
-            border-radius: 15px;
+            padding: 25px;
+            border: 4px solid #000;
+            border-radius: 20px;
             text-align: center;
-            display: none;
+            display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
             z-index: 100;
-            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        h1 { font-size: 1.2rem; margin: 10px 0; text-transform: uppercase; }
+        h1 { font-size: 1.3rem; margin: 10px 0; text-transform: uppercase; line-height: 1.2; }
         .info-detalle { font-size: 1.1rem; color: #d32f2f; font-weight: bold; margin: 10px 0; }
-        .subtexto { font-size: 0.9rem; color: #333; }
+        .subtexto { font-size: 1rem; color: #333; margin-bottom: 10px; }
         
+        /* Botón estilo cómic */
+        .boton-jugar {
+            background: #ffff00;
+            border: 3px solid #000;
+            padding: 10px 25px;
+            font-family: 'Architects Daughter', cursive;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            text-transform: uppercase;
+        }
+
+        .boton-jugar:active { transform: scale(0.95); }
+
         #img-game-over { max-width: 80px; margin: 10px auto; }
 
         .zigzag {
             width: 100%;
-            height: 10px;
+            height: 15px;
             background: linear-gradient(135deg, transparent 25%, #000 25%, #000 50%, transparent 50%, transparent 75%, #000 75%, #000 100%);
-            background-size: 20px 20px;
+            background-size: 30px 30px;
         }
 
-        /* Ajustes para pantallas muy pequeñas (celulares en vertical) */
         @media (max-width: 500px) {
-            h1 { font-size: 1rem; }
-            .info-detalle { font-size: 0.9rem; }
-            #contenedor-juego { aspect-ratio: 4 / 3; } /* Más alto en móvil */
+            h1 { font-size: 1.1rem; }
+            .boton-jugar { padding: 8px 20px; font-size: 1rem; }
+            #contenedor-juego { aspect-ratio: 4 / 3; }
         }
     </style>
 </head>
@@ -88,32 +104,40 @@
     <div id="contenedor-juego">
         <canvas id="juegoCanvas"></canvas>
 
-        <div id="mensaje-victoria" class="pantalla-mensaje">
+        <div id="pantalla-inicio" class="pantalla-mensaje">
             <div class="zigzag"></div>
-            <h1>¡Felicidades! Aquí tienes la información de tu despedida de soltera:</h1>
+            <h1>¡Hola Gabi!</h1>
+            <p class="subtexto">Supera los obstáculos para llegar a la Meta y tener la info de tu despedida de soltera.</p>
+            <h1 style="color: #000; margin-bottom: 0;">¡Suerte!</h1>
+            <button class="boton-jugar" onclick="empezarJuego()">¡Jugar!</button>
+            <div class="zigzag" style="margin-top:20px"></div>
+        </div>
+
+        <div id="mensaje-victoria" class="pantalla-mensaje" style="display: none;">
+            <div class="zigzag"></div>
+            <h1>¡Felicidades Gabi!</h1>
+            <p class="subtexto">Aquí tienes la información:</p>
             <div class="info-detalle">
                 Viernes 1 de mayo 20 hrs<br>
                 Luis Beltrán 1660 depto 302, Ñuñoa.
             </div>
             <h1 style="background: #ffff00; padding: 5px; border: 2px solid #000; font-size: 1rem;">RECUERDA VENIR DE BLANCO.</h1>
-            <div class="subtexto">Toca la pantalla para cerrar</div>
-            <div class="zigzag" style="margin-top:10px"></div>
+            <div class="zigzag" style="margin-top:15px"></div>
         </div>
 
-        <div id="mensaje-derrota" class="pantalla-mensaje">
+        <div id="mensaje-derrota" class="pantalla-mensaje" style="display: none;">
             <h1>¡GOOD GRIEF!</h1>
             <img id="img-game-over" src="derrota.png" alt="Snoopy">
-            <div class="subtexto">¡Casi llegas!<br>Toca la pantalla para reintentar</div>
-            <div class="zigzag" style="margin-top:10px"></div>
+            <div class="subtexto">¡Estuviste cerca!<br>Inténtalo de nuevo, Gabi.</div>
+            <button class="boton-jugar" onclick="reiniciar()">Reintentar</button>
+            <div class="zigzag" style="margin-top:15px"></div>
         </div>
     </div>
 
     <script>
         const canvas = document.getElementById('juegoCanvas');
         const ctx = canvas.getContext('2d');
-        const contenedor = document.getElementById('contenedor-juego');
 
-        // Ajuste de resolución interna del canvas
         function ajustarResolucion() {
             canvas.width = 800;
             canvas.height = 400;
@@ -130,21 +154,21 @@
         }
 
         // --- VARIABLES ---
-        let juegoActivo = true;
-        let velocidadJuego = 5;
+        let juegoActivo = false; // Empieza en falso hasta que haga clic en jugar
+        let velocidadJuego = 5.5;
         let distancia = 0;
-        const META_FINAL = 15000; // Ajustado para que sea divertido en móvil
-        const sueloY = 340;
+        const META_FINAL = 16000; 
+        const sueloY = 345;
 
         const personaje = {
-            x: 50, y: 200, w: 60, h: 60,
-            vy: 0, g: 0.8, salto: -15, suelo: false,
+            x: 60, y: 200, w: 65, h: 65,
+            vy: 0, g: 0.8, salto: -16, suelo: false,
             dibujar() {
                 if(imgPersonaje.complete && imgPersonaje.naturalWidth !== 0) {
                     ctx.drawImage(imgPersonaje, this.x, this.y, this.w, this.h);
                 } else {
                     ctx.fillStyle = "white"; ctx.strokeStyle = "black"; ctx.lineWidth = 3;
-                    ctx.beginPath(); ctx.arc(this.x+30, this.y+30, 25, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(this.x+32, this.y+32, 28, 0, Math.PI*2); ctx.fill(); ctx.stroke();
                 }
             },
             update() {
@@ -162,17 +186,17 @@
         let metaObj = null;
 
         function manejarObstaculos() {
-            if(distancia > META_FINAL - 1000) return;
-            if(Math.random() < 0.02 && (obstaculos.length === 0 || (canvas.width - obstaculos[obstaculos.length-1].x > 300))) {
+            if(distancia > META_FINAL - 1200) return;
+            if(Math.random() < 0.02 && (obstaculos.length === 0 || (canvas.width - obstaculos[obstaculos.length-1].x > 320))) {
                 let tipo = Math.floor(Math.random()*6);
-                let flote = Math.random() > 0.7;
+                let flote = Math.random() > 0.75;
                 obstaculos.push({
                     x: canvas.width,
-                    y: flote ? sueloY - 140 : sueloY - 60,
-                    w: 60, h: 60, t: tipo
+                    y: flote ? sueloY - 145 : sueloY - 65,
+                    w: 65, h: 65, t: tipo
                 });
             }
-            obstaculos.forEach((o, i) => {
+            obstaculos.forEach((o) => {
                 o.x -= velocidadJuego;
                 if(imgsObs[o.t].complete && imgsObs[o.t].naturalWidth !== 0) {
                     ctx.drawImage(imgsObs[o.t], o.x, o.y, o.w, o.h);
@@ -187,11 +211,10 @@
         function loop() {
             if(!juegoActivo) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
             distancia += velocidadJuego;
-            velocidadJuego = 5 + (distancia/5000);
+            velocidadJuego = 5.5 + (distancia/5500);
 
-            // Suelo
+            // Dibujar Pasto
             ctx.fillStyle = "#748C2B";
             ctx.fillRect(0, sueloY, canvas.width, canvas.height - sueloY);
             ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
@@ -202,23 +225,28 @@
             manejarObstaculos();
 
             if(distancia >= META_FINAL && !metaObj) {
-                metaObj = { x: canvas.width, y: 0, w: 100, h: sueloY };
+                metaObj = { x: canvas.width, y: 0, w: 120, h: sueloY };
             }
 
             if(metaObj) {
                 metaObj.x -= velocidadJuego;
                 if(imgMeta.complete && imgMeta.naturalWidth !== 0) {
-                    ctx.drawImage(imgMeta, metaObj.x, sueloY - 120, 120, 120);
+                    ctx.drawImage(imgMeta, metaObj.x, sueloY - 140, 140, 140);
                 }
-                if(personaje.x + personaje.w > metaObj.x) fin(true);
+                if(personaje.x + personaje.w > metaObj.x + 30) fin(true);
             }
-
             requestAnimationFrame(loop);
         }
 
         function checkCol(p, o) {
-            return p.x < o.x + o.w - 15 && p.x + p.w - 15 > o.x &&
+            return p.x < o.x + o.w - 20 && p.x + p.w - 20 > o.x &&
                    p.y < o.y + o.h - 15 && p.y + p.h - 15 > o.y;
+        }
+
+        function empezarJuego() {
+            document.getElementById('pantalla-inicio').style.display = 'none';
+            juegoActivo = true;
+            loop();
         }
 
         function fin(ganaste) {
@@ -227,33 +255,31 @@
         }
 
         function reiniciar() {
-            distancia = 0; velocidadJuego = 5; obstaculos = []; metaObj = null;
-            personaje.y = 200; juegoActivo = true;
+            distancia = 0; velocidadJuego = 5.5; obstaculos = []; metaObj = null;
+            personaje.y = 200; personaje.vy = 0; juegoActivo = true;
             document.getElementById('mensaje-victoria').style.display = 'none';
             document.getElementById('mensaje-derrota').style.display = 'none';
             loop();
         }
 
-        // --- CONTROLES UNIFICADOS (PC Y MÓVIL) ---
-        function accionPrincipal() {
-            if(juegoActivo) {
-                if(personaje.suelo) personaje.vy = personaje.salto;
-            } else {
-                if(document.getElementById('mensaje-derrota').style.display === 'flex') {
-                    reiniciar();
-                }
-            }
-        }
-
-        window.addEventListener('keydown', (e) => { if(e.code === 'Space') accionPrincipal(); });
-        window.addEventListener('touchstart', (e) => { 
-            // Evita que el toque haga cosas raras en el navegador
-            if(e.target.id === 'juegoCanvas' || !juegoActivo) {
-                accionPrincipal();
+        // --- CONTROLES ---
+        window.addEventListener('keydown', (e) => { 
+            if(e.code === 'Space' || e.code === 'ArrowUp') {
+                if(juegoActivo && personaje.suelo) personaje.vy = personaje.salto;
             }
         });
 
-        loop();
+        // Toque en el canvas para saltar
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if(juegoActivo && personaje.suelo) personaje.vy = personaje.salto;
+        }, {passive: false});
+
+        // Para evitar que el botón de "¡Jugar!" haga saltar al personaje al mismo tiempo
+        document.querySelectorAll('.boton-jugar').forEach(btn => {
+            btn.addEventListener('touchstart', (e) => e.stopPropagation());
+        });
+
     </script>
 </body>
 </html>
