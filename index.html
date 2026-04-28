@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Gabi's Bachelorette Adventure</title>
+    <title>Gabi's Adventure</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
         * { box-sizing: border-box; touch-action: manipulation; }
@@ -13,29 +13,33 @@
             font-family: 'Architects Daughter', cursive; overflow: hidden;
         }
         #contenedor-juego { position: relative; width: 100vw; height: 100vh; background-color: #89CFF0; }
-        canvas { display: block; image-rendering: crisp-edges; }
+        canvas { display: block; image-rendering: auto; width: 100%; height: 100%; }
+        
         .pantalla-mensaje {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; max-width: 450px; background: #fff; padding: 20px; border: 4px solid #000;
-            text-align: center; display: none; flex-direction: column; z-index: 100;
-            box-shadow: 6px 6px 0px rgba(0,0,0,0.2);
+            width: 85%; max-width: 420px; background: #fff; padding: 25px; border: 4px solid #000;
+            text-align: center; display: flex; flex-direction: column; align-items: center; z-index: 100;
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.2);
         }
+
         h1 { font-size: 1.4rem; margin: 10px 0; text-transform: uppercase; -webkit-text-stroke: 1px #000; }
-        .info-detalle { font-size: 1.1rem; border: 2px dashed #000; padding: 10px; width: 100%; margin: 10px 0; }
+        .info-detalle { font-size: 1.1rem; border: 2px dashed #000; padding: 12px; width: 100%; margin: 10px 0; }
+        
         .boton-peanuts {
-            background: #FFD200; border: 3px solid #000; padding: 12px 25px;
+            background: #FFD200; border: 3px solid #000; padding: 12px 30px;
             font-family: 'Architects Daughter', cursive; font-size: 1.2rem;
             font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0px #000; text-transform: uppercase;
         }
+
         .zigzag {
             width: 100%; height: 15px;
             background: linear-gradient(135deg, transparent 25%, #000 25%, #000 50%, transparent 50%, transparent 75%, #000 75%, #000 100%);
             background-size: 30px 30px; margin: 10px 0;
         }
         #aliento {
-            position: absolute; top: 20%; width: 100%; text-align: center;
-            font-size: 1.8rem; font-weight: bold; color: #000; display: none;
-            text-shadow: 2px 2px #fff; pointer-events: none;
+            position: absolute; top: 15%; width: 100%; text-align: center;
+            font-size: 1.5rem; font-weight: bold; color: #000; display: none;
+            text-shadow: 2px 2px #fff; pointer-events: none; z-index: 10;
         }
     </style>
 </head>
@@ -45,7 +49,7 @@
         <canvas id="juegoCanvas"></canvas>
         <div id="aliento">¡YA CASI LLEGAS A LA META!</div>
 
-        <div id="pantalla-inicio" class="pantalla-mensaje" style="display: flex;">
+        <div id="pantalla-inicio" class="pantalla-mensaje">
             <div class="zigzag"></div>
             <h1>¡Hola Gabi!</h1>
             <p>Supera los obstáculos para llegar a la Meta.</p>
@@ -53,7 +57,7 @@
             <div class="zigzag"></div>
         </div>
 
-        <div id="mensaje-victoria" class="pantalla-mensaje">
+        <div id="mensaje-victoria" class="pantalla-mensaje" style="display: none;">
             <h1>¡LO LOGRASTE!</h1>
             <div class="info-detalle">
                 Viernes 1 de mayo • 20:00 hrs<br>
@@ -63,10 +67,10 @@
             <div class="zigzag"></div>
         </div>
 
-        <div id="mensaje-derrota" class="pantalla-mensaje">
+        <div id="mensaje-derrota" class="pantalla-mensaje" style="display: none;">
             <h1>¡GOOD GRIEF!</h1>
-            <img src="derrota.png" alt="Snoopy derrotado" style="max-width: 120px; margin: 10px;">
-            <p>¡No te rindas!</p>
+            <img src="derrota.png" alt="Snoopy" style="max-width:120px; margin:10px;" onerror="this.style.display='none'">
+            <p>¡No te rindas, intenta de nuevo!</p>
             <button class="boton-peanuts" onclick="reiniciar()">Reintentar</button>
         </div>
     </div>
@@ -76,146 +80,145 @@
         const ctx = canvas.getContext('2d');
         const alientoTxt = document.getElementById('aliento');
 
-        function redimensionar() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            sueloY = canvas.height * 0.85;
-        }
-
-        const imgPers = new Image(); imgPers.src = 'personaje.png';
-        const imgMeta = new Image(); imgMeta.src = 'meta.png';
-        const imgsObs = [];
-        for(let i=1; i<=6; i++) {
-            let img = new Image(); img.src = `obs${i}.png`;
-            imgsObs.push(img);
-        }
+        // Carga de imágenes simple
+        const imgs = {};
+        const cargar = (n) => { 
+            imgs[n] = new Image(); 
+            imgs[n].src = n + '.png'; 
+        };
+        ['personaje', 'meta', 'obs1', 'obs2', 'obs3', 'obs4', 'obs5', 'obs6'].forEach(cargar);
 
         let juegoActivo = false;
-        let velocidad = 5;
-        let distancia = 0;
-        let sueloY = 0;
-        let saltosCelebracion = 0;
         let victoriaFinalizada = false;
+        let distancia = 0;
+        let velocidad = 5.5;
+        let sueloY = 0;
+        let obstaculos = [];
+        let metaObj = null;
+        let saltosCelebracion = 0;
         let confeti = [];
-        const META_FINAL = 15000; 
+        const META_FINAL = 16000;
 
         const personaje = {
-            x: 60, y: 0, w: 95, h: 95,
-            vy: 0, g: 0.75, salto: -18, suelo: false,
+            x: 60, y: 0, w: 90, h: 90, vy: 0, g: 0.8, salto: -18, suelo: false,
             dibujar() {
-                if(imgPers.complete && imgPers.naturalWidth !== 0) {
-                    ctx.drawImage(imgPers, this.x, this.y, this.w, this.h);
+                if (imgs.personaje.complete && imgs.personaje.naturalWidth > 0) {
+                    ctx.drawImage(imgs.personaje, this.x, this.y, this.w, this.h);
                 } else {
                     ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
-                    ctx.beginPath(); ctx.arc(this.x+47, this.y+47, 45, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(this.x+45, this.y+45, 40, 0, Math.PI*2); ctx.fill(); ctx.stroke();
                 }
             },
             update() {
                 this.vy += this.g;
                 this.y += this.vy;
-                if(this.y + this.h > sueloY) {
+                if (this.y + this.h > sueloY) {
                     this.y = sueloY - this.h;
                     this.vy = 0;
-                    if(!this.suelo && victoriaFinalizada && saltosCelebracion < 3) {
-                        this.vy = this.salto; 
+                    if (!this.suelo && victoriaFinalizada && saltosCelebracion < 3) {
+                        this.vy = this.salto;
                         saltosCelebracion++;
-                        if(saltosCelebracion === 3) setTimeout(() => document.getElementById('mensaje-victoria').style.display = 'flex', 800);
+                        if (saltosCelebracion === 3) {
+                            setTimeout(() => document.getElementById('mensaje-victoria').style.display = 'flex', 800);
+                        }
                     }
                     this.suelo = true;
                 } else { this.suelo = false; }
             }
         };
 
-        function crearConfeti() {
-            for(let i=0; i<100; i++) {
-                confeti.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height - canvas.height,
-                    r: Math.random() * 6 + 2,
-                    d: Math.random() * 10 + 2,
-                    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-                    v: Math.random() * 3 + 2
-                });
-            }
+        function redimensionar() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            sueloY = canvas.height * 0.82;
         }
 
-        let obstaculos = [];
-        let metaObj = null;
-
-        function manejarObs() {
-            if(distancia > META_FINAL - 2000) {
+        function manejarObstaculos() {
+            if (distancia > META_FINAL - 2200) {
                 alientoTxt.style.display = victoriaFinalizada ? 'none' : 'block';
                 return;
             }
             alientoTxt.style.display = 'none';
 
-            let puedeAparecer = true;
-            if(obstaculos.length > 0) {
-                let ultimo = obstaculos[obstaculos.length - 1];
-                if(canvas.width - ultimo.x < 450) puedeAparecer = false;
+            if (obstaculos.length === 0 || (canvas.width - obstaculos[obstaculos.length-1].x > 500)) {
+                if (Math.random() < 0.02) {
+                    let num = Math.floor(Math.random() * 6) + 1;
+                    let tam = 85 + Math.random() * 25;
+                    obstaculos.push({ x: canvas.width, y: sueloY - tam, w: tam, h: tam, img: imgs['obs'+num] });
+                }
             }
 
-            if(puedeAparecer && Math.random() < 0.015) {
-                let tam = 90 + Math.random()*20;
-                obstaculos.push({ x: canvas.width, y: sueloY - tam, w: tam, h: tam, t: Math.floor(Math.random()*6)});
-            }
-
-            obstaculos.forEach((o) => {
+            for (let i = obstaculos.length - 1; i >= 0; i--) {
+                let o = obstaculos[i];
                 o.x -= velocidad;
-                if(imgsObs[o.t].complete) ctx.drawImage(imgsObs[o.t], o.x, o.y, o.w, o.h);
-                if(checkCol(personaje, o)) fin(false);
-            });
-            obstaculos = obstaculos.filter(o => o.x + o.w > 0);
+                if (o.img.complete && o.img.naturalWidth > 0) {
+                    ctx.drawImage(o.img, o.x, o.y, o.w, o.h);
+                } else {
+                    ctx.fillStyle = "#FFD200"; ctx.strokeRect(o.x, o.y, o.w, o.h);
+                }
+                
+                // Colisión
+                let m = 28;
+                if (personaje.x + m < o.x + o.w - m && personaje.x + personaje.w - m > o.x + m &&
+                    personaje.y + m < o.y + o.h - m && personaje.y + personaje.h - m > o.y + m) {
+                    fin();
+                }
+                if (o.x + o.w < 0) obstaculos.splice(i, 1);
+            }
         }
 
         function loop() {
-            if(!juegoActivo && !victoriaFinalizada) return;
+            if (!juegoActivo && !victoriaFinalizada) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            if(!victoriaFinalizada) {
+
+            if (!victoriaFinalizada) {
                 distancia += velocidad;
-                velocidad = 5 + (distancia / 7000);
+                velocidad = 5.5 + (distancia / 8000);
             }
 
-            // Suelo
+            // Suelo verde
             ctx.fillStyle = "#748C2B";
             ctx.fillRect(0, sueloY, canvas.width, canvas.height - sueloY);
-            ctx.strokeStyle = "#000"; ctx.lineWidth = 4;
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 5;
             ctx.beginPath(); ctx.moveTo(0, sueloY); ctx.lineTo(canvas.width, sueloY); ctx.stroke();
 
             personaje.update();
             personaje.dibujar();
 
-            if(!victoriaFinalizada) manejarObs();
+            if (!victoriaFinalizada) manejarObstaculos();
 
-            if(distancia >= META_FINAL && !metaObj) {
-                metaObj = { x: canvas.width, y: 0, w: 200, h: sueloY };
+            // Meta
+            if (distancia >= META_FINAL && !metaObj) {
+                metaObj = { x: canvas.width, y: sueloY - 240, w: 240, h: 240 };
             }
-
-            if(metaObj) {
-                if(!victoriaFinalizada) metaObj.x -= velocidad;
-                if(imgMeta.complete) ctx.drawImage(imgMeta, metaObj.x, sueloY - 220, 220, 220);
-                if(!victoriaFinalizada && personaje.x + personaje.w > metaObj.x + 50) {
+            if (metaObj) {
+                if (!victoriaFinalizada) metaObj.x -= velocidad;
+                if (imgs.meta.complete) ctx.drawImage(imgs.meta, metaObj.x, metaObj.y, metaObj.w, metaObj.h);
+                if (!victoriaFinalizada && personaje.x + personaje.w > metaObj.x + 60) {
                     victoriaFinalizada = true;
+                    personaje.vy = personaje.salto;
                     crearConfeti();
-                    personaje.vy = personaje.salto; // Inicia saltos de celebración
                 }
             }
 
+            // Confeti
             confeti.forEach(p => {
                 ctx.fillStyle = p.color;
                 ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
                 p.y += p.v;
-                if(p.y > canvas.height) p.y = -10;
+                if (p.y > canvas.height) p.y = -20;
             });
 
             requestAnimationFrame(loop);
         }
 
-        function checkCol(p, o) {
-            let m = 25;
-            return p.x + m < o.x + o.w - m && p.x + p.w - m > o.x + m &&
-                   p.y + m < o.y + o.h - m && p.y + p.h - m > o.y + m;
+        function crearConfeti() {
+            for(let i=0; i<80; i++) {
+                confeti.push({
+                    x: Math.random()*canvas.width, y: Math.random()*canvas.height - canvas.height,
+                    r: Math.random()*5+2, color: `hsl(${Math.random()*360},80%,60%)`, v: Math.random()*4+2
+                });
+            }
         }
 
         function empezarJuego() {
@@ -225,13 +228,13 @@
             loop();
         }
 
-        function fin(ganaste) {
+        function fin() {
             juegoActivo = false;
-            if(!ganaste) document.getElementById('mensaje-derrota').style.display = 'flex';
+            document.getElementById('mensaje-derrota').style.display = 'flex';
         }
 
         function reiniciar() {
-            distancia = 0; velocidad = 5; obstaculos = []; metaObj = null;
+            distancia = 0; velocidad = 5.5; obstaculos = []; metaObj = null;
             victoriaFinalizada = false; saltosCelebracion = 0; confeti = [];
             personaje.vy = 0; juegoActivo = true;
             document.getElementById('mensaje-derrota').style.display = 'none';
@@ -239,13 +242,12 @@
         }
 
         window.addEventListener('resize', redimensionar);
-        window.addEventListener('keydown', (e) => { 
-            if((e.code === 'Space' || e.code === 'ArrowUp') && juegoActivo && personaje.suelo) personaje.vy = personaje.salto;
-        });
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if(juegoActivo && personaje.suelo) personaje.vy = personaje.salto;
-        }, {passive: false});
+        const saltar = (e) => {
+            if (e.type === 'touchstart') e.preventDefault();
+            if ((juegoActivo || victoriaFinalizada) && personaje.suelo) personaje.vy = personaje.salto;
+        };
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') saltar(e); });
+        canvas.addEventListener('touchstart', saltar, {passive: false});
 
         redimensionar();
     </script>
