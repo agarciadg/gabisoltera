@@ -3,108 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Gabi's Bachelorette Party</title>
+    <title>Gabi's Party Adventure</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
 
-        * {
-            box-sizing: border-box;
-            touch-action: manipulation;
-        }
+        * { box-sizing: border-box; touch-action: manipulation; }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
+            margin: 0; padding: 0; width: 100%; height: 100%;
             background-color: #fcfaf2; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
             font-family: 'Architects Daughter', cursive;
-            overflow: hidden; /* Bloquea el scroll por completo */
+            overflow: hidden;
         }
 
         #contenedor-juego {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #89CFF0; /* Azul cielo por si falla el canvas */
+            position: relative; width: 100vw; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            background-color: #89CFF0;
         }
 
-        canvas {
-            background-color: #89CFF0; 
-            display: block;
-            image-rendering: crisp-edges;
-            max-width: 100%;
-            max-height: 100%;
-        }
+        canvas { background-color: #89CFF0; display: block; image-rendering: crisp-edges; }
 
-        /* Pantallas de Mensaje optimizadas para no scrollear */
         .pantalla-mensaje {
-            position: absolute;
-            width: 85%;
-            max-width: 500px;
-            max-height: 90vh; /* Nunca más alto que la pantalla */
-            background: #fff;
-            padding: 15px;
-            border: 4px solid #000;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around; /* Distribuye elementos para ahorrar espacio */
-            align-items: center;
-            z-index: 100;
+            position: absolute; width: 85%; max-width: 450px;
+            background: #fff; padding: 20px; border: 4px solid #000;
+            text-align: center; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 100;
             box-shadow: 6px 6px 0px rgba(0,0,0,0.2);
         }
 
-        h1 { 
-            font-size: 1.4rem; 
-            margin: 5px 0; 
-            text-transform: uppercase; 
-            -webkit-text-stroke: 1px #000;
-        }
-
-        p { font-size: 1rem; margin: 5px 0; line-height: 1.2; }
-
-        .info-detalle { 
-            font-size: 1.1rem; 
-            color: #000; 
-            margin: 10px 0; 
-            padding: 8px;
-            border: 2px dashed #000;
-            width: 100%;
-        }
-
+        h1 { font-size: 1.4rem; margin: 10px 0; text-transform: uppercase; -webkit-text-stroke: 1px #000; }
+        .info-detalle { font-size: 1.1rem; border: 2px dashed #000; padding: 10px; width: 100%; margin: 10px 0; }
         .boton-peanuts {
-            background: #FFD200; 
-            border: 3px solid #000;
-            padding: 10px 25px;
-            font-family: 'Architects Daughter', cursive;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 4px 4px 0px #000;
+            background: #FFD200; border: 3px solid #000; padding: 12px 25px;
+            font-family: 'Architects Daughter', cursive; font-size: 1.2rem;
+            font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0px #000;
             text-transform: uppercase;
         }
 
         .zigzag {
-            width: 100%;
-            height: 15px;
+            width: 100%; height: 15px;
             background: linear-gradient(135deg, transparent 25%, #000 25%, #000 50%, transparent 50%, transparent 75%, #000 75%, #000 100%);
-            background-size: 30px 30px;
-            margin: 5px 0;
-        }
-
-        /* Ajustes específicos para móviles en vertical */
-        @media (max-height: 500px) {
-            h1 { font-size: 1.1rem; }
-            p { font-size: 0.9rem; }
-            .info-detalle { font-size: 0.9rem; margin: 5px 0; }
-            .zigzag { height: 10px; background-size: 20px 20px; }
+            background-size: 30px 30px; margin: 10px 0;
         }
     </style>
 </head>
@@ -116,13 +57,13 @@
         <div id="pantalla-inicio" class="pantalla-mensaje">
             <div class="zigzag"></div>
             <h1>¡Hola Gabi!</h1>
-            <p>Supera los obstáculos para llegar a la Meta y conocer los detalles de tu despedida.</p>
+            <p>Esquiva los obstáculos para llegar a la meta y ver tu invitación.</p>
             <button class="boton-peanuts" onclick="empezarJuego()">¡Jugar!</button>
-            <div class="zigzag"></div>
+            <div class="zigzag" style="margin-top:15px"></div>
         </div>
 
         <div id="mensaje-victoria" class="pantalla-mensaje" style="display: none;">
-            <h1>¡LO LOGRASTE GABI!</h1>
+            <h1>¡LO LOGRASTE!</h1>
             <div class="info-detalle">
                 Viernes 1 de mayo • 20:00 hrs<br>
                 Luis Beltrán 1660 depto 302, Ñuñoa.
@@ -133,9 +74,8 @@
 
         <div id="mensaje-derrota" class="pantalla-mensaje" style="display: none;">
             <h1>¡GOOD GRIEF!</h1>
-            <p>¡Casi llegas, Gabi!</p>
+            <p>¡Casi llegas!</p>
             <button class="boton-peanuts" onclick="reiniciar()">Reintentar</button>
-            <div class="zigzag"></div>
         </div>
     </div>
 
@@ -143,11 +83,9 @@
         const canvas = document.getElementById('juegoCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Función para ajustar el canvas al tamaño real de la pantalla
         function redimensionar() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            // Ajustar el suelo proporcionalmente
             sueloY = canvas.height * 0.85;
             personaje.y = sueloY - personaje.h;
         }
@@ -164,17 +102,17 @@
         let velocidad = 5;
         let distancia = 0;
         let sueloY = 0;
-        const META_FINAL = 12000; 
+        const META_FINAL = 15000; 
 
         const personaje = {
-            x: 50, y: 0, w: 90, h: 90, // Tamaño grande
-            vy: 0, g: 0.8, salto: -18, suelo: false,
+            x: 60, y: 0, w: 95, h: 95,
+            vy: 0, g: 0.75, salto: -18, suelo: false,
             dibujar() {
                 if(imgPers.complete && imgPers.naturalWidth !== 0) {
                     ctx.drawImage(imgPers, this.x, this.y, this.w, this.h);
                 } else {
                     ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
-                    ctx.beginPath(); ctx.arc(this.x+45, this.y+45, 40, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(this.x+47, this.y+47, 45, 0, Math.PI*2); ctx.fill(); ctx.stroke();
                 }
             },
             update() {
@@ -192,17 +130,28 @@
         let metaObj = null;
 
         function manejarObs() {
-            if(distancia > META_FINAL - 1500) return;
-            if(Math.random() < 0.02 && (obstaculos.length === 0 || (canvas.width - obstaculos[obstaculos.length-1].x > canvas.width * 0.4))) {
+            if(distancia > META_FINAL - 2000) return;
+
+            // LÓGICA DE DIFICULTAD JUSTA:
+            // 1. Solo aparece si no hay obstáculos cerca (mínimo 450px de separación)
+            // 2. Probabilidad controlada
+            let puedeAparecer = true;
+            if(obstaculos.length > 0) {
+                let ultimo = obstaculos[obstaculos.length - 1];
+                if(canvas.width - ultimo.x < 450) puedeAparecer = false;
+            }
+
+            if(puedeAparecer && Math.random() < 0.015) {
                 let tipo = Math.floor(Math.random()*6);
-                let flote = Math.random() > 0.8;
-                let tam = 80 + Math.random()*20;
+                let flote = Math.random() > 0.85; // Menos obstáculos flotantes (son más difíciles)
+                let tam = 90 + Math.random()*20;
                 obstaculos.push({
                     x: canvas.width,
-                    y: flote ? sueloY - tam - 100 : sueloY - tam,
+                    y: flote ? sueloY - tam - 120 : sueloY - tam,
                     w: tam, h: tam, t: tipo
                 });
             }
+
             obstaculos.forEach((o) => {
                 o.x -= velocidad;
                 if(imgsObs[o.t].complete && imgsObs[o.t].naturalWidth !== 0) {
@@ -219,9 +168,11 @@
             if(!juegoActivo) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             distancia += velocidad;
-            velocidad = 5 + (distancia/5000);
+            
+            // Subida de velocidad MUCHO más suave
+            velocidad = 5 + (distancia / 7000); 
 
-            // Dibujar suelo
+            // Suelo
             ctx.fillStyle = "#748C2B";
             ctx.fillRect(0, sueloY, canvas.width, canvas.height - sueloY);
             ctx.strokeStyle = "#000"; ctx.lineWidth = 4;
@@ -232,22 +183,26 @@
             manejarObs();
 
             if(distancia >= META_FINAL && !metaObj) {
-                metaObj = { x: canvas.width, y: 0, w: 150, h: sueloY };
+                metaObj = { x: canvas.width, y: 0, w: 200, h: sueloY };
             }
 
             if(metaObj) {
                 metaObj.x -= velocidad;
                 if(imgMeta.complete && imgMeta.naturalWidth !== 0) {
-                    ctx.drawImage(imgMeta, metaObj.x, sueloY - 180, 180, 180);
+                    ctx.drawImage(imgMeta, metaObj.x, sueloY - 220, 220, 220);
                 }
-                if(personaje.x + personaje.w > metaObj.x + 30) fin(true);
+                if(personaje.x + personaje.w > metaObj.x + 50) fin(true);
             }
             requestAnimationFrame(loop);
         }
 
         function checkCol(p, o) {
-            return p.x < o.x + o.w - 25 && p.x + p.w - 25 > o.x &&
-                   p.y < o.y + o.h - 20 && p.y + p.h - 20 > o.y;
+            // Hitbox un poco más pequeña que la imagen para ser "generosos" con Gabi
+            let margen = 25;
+            return p.x + margen < o.x + o.w - margen && 
+                   p.x + p.w - margen > o.x + margen &&
+                   p.y + margen < o.y + o.h - margen && 
+                   p.y + p.h - margen > o.y + margen;
         }
 
         function empezarJuego() {
@@ -269,7 +224,6 @@
             loop();
         }
 
-        // Eventos
         window.addEventListener('resize', redimensionar);
         window.addEventListener('keydown', (e) => { 
             if(e.code === 'Space' || e.code === 'ArrowUp') {
