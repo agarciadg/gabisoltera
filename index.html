@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Gabi's Adventure</title>
+    <title>Gabi's Bachelorette Adventure</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
         * { box-sizing: border-box; touch-action: manipulation; }
@@ -13,7 +13,7 @@
             font-family: 'Architects Daughter', cursive; overflow: hidden;
         }
         #contenedor-juego { position: relative; width: 100vw; height: 100vh; background-color: #89CFF0; }
-        canvas { display: block; image-rendering: crisp-edges; }
+        canvas { display: block; image-rendering: auto; }
         
         .pantalla-mensaje {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -22,20 +22,20 @@
             box-shadow: 8px 8px 0px rgba(0,0,0,0.2);
         }
 
-        #mensaje-derrota img {
-            display: block;
-            margin: 15px auto;
-            max-width: 140px;
-            height: auto;
-        }
+        #mensaje-derrota img { display: block; margin: 15px auto; max-width: 140px; height: auto; }
 
         h1 { font-size: 1.4rem; margin: 10px 0; text-transform: uppercase; -webkit-text-stroke: 1px #000; }
         .info-detalle { font-size: 1.1rem; border: 2px dashed #000; padding: 12px; width: 100%; margin: 10px 0; }
+        
         .boton-peanuts {
             background: #FFD200; border: 3px solid #000; padding: 12px 30px;
             font-family: 'Architects Daughter', cursive; font-size: 1.2rem;
             font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0px #000; text-transform: uppercase;
         }
+        /* Estado de carga */
+        #boton-inicio { display: none; }
+        #texto-carga { display: block; font-weight: bold; margin-top: 10px; }
+
         .zigzag {
             width: 100%; height: 15px;
             background: linear-gradient(135deg, transparent 25%, #000 25%, #000 50%, transparent 50%, transparent 75%, #000 75%, #000 100%);
@@ -52,13 +52,14 @@
 
     <div id="contenedor-juego">
         <canvas id="juegoCanvas"></canvas>
-        <div id="aliento">¡YA CASI LLEGAS A LA META!http://googleusercontent.com/image_generation_content/1
+        <div id="aliento">¡YA CASI LLEGAS A LA META!</div>
 
         <div id="pantalla-inicio" class="pantalla-mensaje" style="display: flex;">
             <div class="zigzag"></div>
             <h1>¡Hola Gabi!</h1>
             <p>Supera los obstáculos para llegar a la Meta.</p>
-            <button class="boton-peanuts" onclick="empezarJuego()">¡Jugar!</button>
+            <div id="texto-carga">Cargando dibujos...</div>
+            <button id="boton-inicio" class="boton-peanuts" onclick="empezarJuego()">¡Jugar!</button>
             <div class="zigzag"></div>
         </div>
 
@@ -74,7 +75,7 @@
 
         <div id="mensaje-derrota" class="pantalla-mensaje">
             <h1>¡GOOD GRIEF!</h1>
-            <img src="derrota.png" alt="Snoopy" onerror="this.style.display='none'">
+            <img src="derrota.png" alt="Snoopy">
             <p>¡No te rindas, intenta de nuevo!</p>
             <button class="boton-peanuts" onclick="reiniciar()">Reintentar</button>
         </div>
@@ -85,18 +86,38 @@
         const ctx = canvas.getContext('2d');
         const alientoTxt = document.getElementById('aliento');
 
+        // --- CARGADOR DE IMÁGENES ---
+        const assets = {
+            personaje: 'personaje.png',
+            meta: 'meta.png',
+            derrota: 'derrota.png',
+            obs1: 'obs1.png', obs2: 'obs2.png', obs3: 'obs3.png',
+            obs4: 'obs4.png', obs5: 'obs5.png', obs6: 'obs6.png'
+        };
+        const imagenes = {};
+        let totalImagenes = Object.keys(assets).length;
+        let imagenesCargadas = 0;
+
+        function cargarRecursos() {
+            for (let clave in assets) {
+                const img = new Image();
+                img.onload = () => {
+                    imagenesCargadas++;
+                    if (imagenesCargadas === totalImagenes) {
+                        document.getElementById('texto-carga').style.display = 'none';
+                        document.getElementById('boton-inicio').style.display = 'block';
+                    }
+                };
+                img.src = assets[clave];
+                imagenes[clave] = img;
+            }
+        }
+
         function redimensionar() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             sueloY = canvas.height * 0.82;
-        }
-
-        const imgPers = new Image(); imgPers.src = 'personaje.png';
-        const imgMeta = new Image(); imgMeta.src = 'meta.png';
-        const imgsObs = [];
-        for(let i=1; i<=6; i++) {
-            let img = new Image(); img.src = `obs${i}.png`;
-            imgsObs.push(img);
+            personaje.y = sueloY - personaje.h;
         }
 
         let juegoActivo = false;
@@ -112,13 +133,7 @@
             x: 65, y: 0, w: 90, h: 90,
             vy: 0, g: 0.8, salto: -18, suelo: false,
             dibujar() {
-                if(imgPers.complete && imgPers.naturalWidth !== 0) {
-                    ctx.drawImage(imgPers, this.x, this.y, this.w, this.h);
-                } else {
-                    // Backup visual: Snoopy Blanco
-                    ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
-                    ctx.beginPath(); ctx.ellipse(this.x+45, this.y+45, 40, 30, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-                }
+                ctx.drawImage(imagenes.personaje, this.x, this.y, this.w, this.h);
             },
             update() {
                 this.vy += this.g;
@@ -161,25 +176,17 @@
             alientoTxt.style.display = 'none';
 
             let minEspacio = 480; 
-            let puedeAparecer = true;
-            if(obstaculos.length > 0) {
-                if(canvas.width - obstaculos[obstaculos.length - 1].x < minEspacio) puedeAparecer = false;
-            }
+            if(obstaculos.length > 0 && canvas.width - obstaculos[obstaculos.length-1].x < minEspacio) return;
 
-            if(puedeAparecer && Math.random() < 0.018) {
+            if(Math.random() < 0.018) {
                 let tam = 85 + Math.random()*25;
-                obstaculos.push({ x: canvas.width, y: sueloY - tam, w: tam, h: tam, t: Math.floor(Math.random()*6)});
+                let idObs = `obs${Math.floor(Math.random()*6) + 1}`;
+                obstaculos.push({ x: canvas.width, y: sueloY - tam, w: tam, h: tam, img: imagenes[idObs] });
             }
 
             obstaculos.forEach((o) => {
                 o.x -= velocidad;
-                if(imgsObs[o.t].complete && imgsObs[o.t].naturalWidth !== 0) {
-                    ctx.drawImage(imgsObs[o.t], o.x, o.y, o.w, o.h);
-                } else {
-                    // Backup visual para obstáculos
-                    ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
-                    ctx.strokeRect(o.x, o.y, o.w, o.h);
-                }
+                ctx.drawImage(o.img, o.x, o.y, o.w, o.h);
                 if(checkCol(personaje, o)) fin(false);
             });
             obstaculos = obstaculos.filter(o => o.x + o.w > 0);
@@ -191,14 +198,14 @@
             
             if(!victoriaFinalizada) {
                 distancia += velocidad;
-                velocidad = 5.5 + (distancia / 8000);
+                velocidad = 5.5 + (distancia / 8500);
             }
 
-            // Pasto Verde que llega hasta el final de la pantalla
+            // Pasto Verde (Cubre hasta el fondo)
             ctx.fillStyle = "#748C2B";
             ctx.fillRect(0, sueloY, canvas.width, canvas.height - sueloY);
             
-            // Línea de tierra estilo Peanut
+            // Línea de suelo
             ctx.strokeStyle = "#000"; ctx.lineWidth = 5;
             ctx.beginPath(); ctx.moveTo(0, sueloY); ctx.lineTo(canvas.width, sueloY); ctx.stroke();
 
@@ -213,7 +220,7 @@
 
             if(metaObj) {
                 if(!victoriaFinalizada) metaObj.x -= velocidad;
-                if(imgMeta.complete) ctx.drawImage(imgMeta, metaObj.x, sueloY - 240, 240, 240);
+                ctx.drawImage(imagenes.meta, metaObj.x, sueloY - 240, 240, 240);
                 
                 if(!victoriaFinalizada && personaje.x + personaje.w > metaObj.x + 60) {
                     victoriaFinalizada = true;
@@ -233,7 +240,7 @@
         }
 
         function checkCol(p, o) {
-            let m = 28; // Margen generoso
+            let m = 28; 
             return p.x + m < o.x + o.w - m && p.x + p.w - m > o.x + m &&
                    p.y + m < o.y + o.h - m && p.y + p.h - m > o.y + m;
         }
@@ -260,13 +267,18 @@
 
         window.addEventListener('resize', redimensionar);
         window.addEventListener('keydown', (e) => { 
-            if((e.code === 'Space' || e.code === 'ArrowUp') && juegoActivo && personaje.suelo) personaje.vy = personaje.salto;
+            if((e.code === 'Space' || e.code === 'ArrowUp') && juegoActivo && personaje.suelo) {
+                e.preventDefault();
+                personaje.vy = personaje.salto;
+            }
         });
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             if(juegoActivo && personaje.suelo) personaje.vy = personaje.salto;
         }, {passive: false});
 
+        // Inicialización
+        cargarRecursos();
         redimensionar();
     </script>
 </body>
