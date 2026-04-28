@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Gabi's BIG Bachelorette Adventure</title>
+    <title>Gabi's Bachelorette Party</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
 
@@ -12,108 +12,99 @@
             touch-action: manipulation;
         }
 
-        body {
+        body, html {
             margin: 0;
             padding: 0;
+            width: 100%;
+            height: 100%;
             background-color: #fcfaf2; 
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            width: 100vw;
             font-family: 'Architects Daughter', cursive;
-            overflow: hidden;
+            overflow: hidden; /* Bloquea el scroll por completo */
         }
 
         #contenedor-juego {
             position: relative;
-            width: 100%;
-            max-width: 1000px; /* Un poco más ancho para dar espacio */
-            aspect-ratio: 2 / 1;
-            margin: 10px;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #89CFF0; /* Azul cielo por si falla el canvas */
         }
 
         canvas {
             background-color: #89CFF0; 
-            border: 5px solid #000; /* Borde más grueso */
-            border-radius: 4px;
-            width: 100%;
-            height: 100%;
             display: block;
             image-rendering: crisp-edges;
+            max-width: 100%;
+            max-height: 100%;
         }
 
+        /* Pantallas de Mensaje optimizadas para no scrollear */
         .pantalla-mensaje {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
+            width: 85%;
+            max-width: 500px;
+            max-height: 90vh; /* Nunca más alto que la pantalla */
             background: #fff;
-            padding: 30px;
-            border: 5px solid #000;
+            padding: 15px;
+            border: 4px solid #000;
             text-align: center;
             display: flex;
             flex-direction: column;
+            justify-content: space-around; /* Distribuye elementos para ahorrar espacio */
             align-items: center;
             z-index: 100;
-            box-shadow: 10px 10px 0px rgba(0,0,0,0.2);
-            overflow-y: auto;
-            max-height: 95%;
+            box-shadow: 6px 6px 0px rgba(0,0,0,0.2);
         }
 
         h1 { 
-            font-size: 2rem; /* Texto más grande */
-            margin: 15px 0; 
+            font-size: 1.4rem; 
+            margin: 5px 0; 
             text-transform: uppercase; 
-            letter-spacing: 1px;
-            -webkit-text-stroke: 1.5px #000;
+            -webkit-text-stroke: 1px #000;
         }
 
-        p { font-size: 1.3rem; line-height: 1.4; }
+        p { font-size: 1rem; margin: 5px 0; line-height: 1.2; }
 
         .info-detalle { 
-            font-size: 1.5rem; /* Texto más grande */
+            font-size: 1.1rem; 
             color: #000; 
-            margin: 20px 0; 
-            padding: 15px;
-            border: 3px dashed #000;
+            margin: 10px 0; 
+            padding: 8px;
+            border: 2px dashed #000;
+            width: 100%;
         }
 
         .boton-peanuts {
             background: #FFD200; 
-            border: 4px solid #000;
-            padding: 15px 40px;
+            border: 3px solid #000;
+            padding: 10px 25px;
             font-family: 'Architects Daughter', cursive;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 15px;
-            box-shadow: 6px 6px 0px #000;
+            box-shadow: 4px 4px 0px #000;
             text-transform: uppercase;
-        }
-
-        .boton-peanuts:active {
-            transform: translate(3px, 3px);
-            box-shadow: 3px 3px 0px #000;
         }
 
         .zigzag {
             width: 100%;
-            height: 25px; /* Zigzag más grande */
-            background: 
-                linear-gradient(135deg, transparent 25%, #000 25%, #000 50%, transparent 50%, transparent 75%, #000 75%, #000 100%),
-                linear-gradient(225deg, transparent 25%, #000 25%, #000 50%, transparent 50%, transparent 75%, #000 75%, #000 100%);
-            background-size: 50px 50px;
-            margin: 15px 0;
+            height: 15px;
+            background: linear-gradient(135deg, transparent 25%, #000 25%, #000 50%, transparent 50%, transparent 75%, #000 75%, #000 100%);
+            background-size: 30px 30px;
+            margin: 5px 0;
         }
 
-        @media (max-width: 600px) {
-            h1 { font-size: 1.5rem; }
-            p { font-size: 1.1rem; }
-            .info-detalle { font-size: 1.2rem; }
-            .boton-peanuts { font-size: 1.2rem; padding: 10px 30px; }
-            #contenedor-juego { aspect-ratio: 4 / 3; }
+        /* Ajustes específicos para móviles en vertical */
+        @media (max-height: 500px) {
+            h1 { font-size: 1.1rem; }
+            p { font-size: 0.9rem; }
+            .info-detalle { font-size: 0.9rem; margin: 5px 0; }
+            .zigzag { height: 10px; background-size: 20px 20px; }
         }
     </style>
 </head>
@@ -123,29 +114,28 @@
         <canvas id="juegoCanvas"></canvas>
 
         <div id="pantalla-inicio" class="pantalla-mensaje">
-            <h1>¡Hola Gabi!</h1>
             <div class="zigzag"></div>
+            <h1>¡Hola Gabi!</h1>
             <p>Supera los obstáculos para llegar a la Meta y conocer los detalles de tu despedida.</p>
-            <h1>¡Suerte!</h1>
             <button class="boton-peanuts" onclick="empezarJuego()">¡Jugar!</button>
+            <div class="zigzag"></div>
         </div>
 
         <div id="mensaje-victoria" class="pantalla-mensaje" style="display: none;">
             <h1>¡LO LOGRASTE GABI!</h1>
-            <div class="zigzag"></div>
             <div class="info-detalle">
                 Viernes 1 de mayo • 20:00 hrs<br>
                 Luis Beltrán 1660 depto 302, Ñuñoa.
             </div>
-            <h1 style="background: #FFD200; padding: 10px; border: 4px solid #000;">VENIR DE BLANCO</h1>
+            <h1 style="background: #FFD200; padding: 5px; border: 3px solid #000; font-size: 1rem;">VENIR DE BLANCO</h1>
             <div class="zigzag"></div>
         </div>
 
         <div id="mensaje-derrota" class="pantalla-mensaje" style="display: none;">
             <h1>¡GOOD GRIEF!</h1>
-            <img src="derrota.png" alt="" style="max-width: 120px; margin: 15px;" onerror="this.style.display='none'">
             <p>¡Casi llegas, Gabi!</p>
-            <button class="boton-peanuts" onclick="reiniciar()">Intentar otra vez</button>
+            <button class="boton-peanuts" onclick="reiniciar()">Reintentar</button>
+            <div class="zigzag"></div>
         </div>
     </div>
 
@@ -153,9 +143,14 @@
         const canvas = document.getElementById('juegoCanvas');
         const ctx = canvas.getContext('2d');
 
-        // AUMENTO DE RESOLUCIÓN INTERNA
-        canvas.width = 1200;
-        canvas.height = 600;
+        // Función para ajustar el canvas al tamaño real de la pantalla
+        function redimensionar() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            // Ajustar el suelo proporcionalmente
+            sueloY = canvas.height * 0.85;
+            personaje.y = sueloY - personaje.h;
+        }
 
         const imgPers = new Image(); imgPers.src = 'personaje.png';
         const imgMeta = new Image(); imgMeta.src = 'meta.png';
@@ -166,24 +161,20 @@
         }
 
         let juegoActivo = false;
-        let velocidad = 6; // Un poco más rápido para compensar el tamaño
+        let velocidad = 5;
         let distancia = 0;
-        const META_FINAL = 25000; // Más distancia porque todo es más grande
-        const sueloY = 520; // Suelo más bajo
+        let sueloY = 0;
+        const META_FINAL = 12000; 
 
         const personaje = {
-            // TAMAÑO AGRANDADO (Casi el doble)
-            x: 100, y: 300, w: 110, h: 110,
-            // FÍSICA AJUSTADA PARA EL NUEVO TAMAÑO
-            vy: 0, g: 1.0, salto: -22, suelo: false,
+            x: 50, y: 0, w: 90, h: 90, // Tamaño grande
+            vy: 0, g: 0.8, salto: -18, suelo: false,
             dibujar() {
                 if(imgPers.complete && imgPers.naturalWidth !== 0) {
                     ctx.drawImage(imgPers, this.x, this.y, this.w, this.h);
                 } else {
-                    ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 4;
-                    ctx.beginPath(); ctx.ellipse(this.x+55, this.y+55, 50, 40, 0, 0, Math.PI*2);
-                    ctx.fill(); ctx.stroke();
-                    ctx.fillStyle = "#000"; ctx.fillRect(this.x+15, this.y+30, 20, 40); 
+                    ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
+                    ctx.beginPath(); ctx.arc(this.x+45, this.y+45, 40, 0, Math.PI*2); ctx.fill(); ctx.stroke();
                 }
             },
             update() {
@@ -201,17 +192,15 @@
         let metaObj = null;
 
         function manejarObs() {
-            if(distancia > META_FINAL - 2000) return;
-            // Spawning ajustado para objetos más grandes
-            if(Math.random() < 0.02 && (obstaculos.length === 0 || (canvas.width - obstaculos[obstaculos.length-1].x > 500))) {
+            if(distancia > META_FINAL - 1500) return;
+            if(Math.random() < 0.02 && (obstaculos.length === 0 || (canvas.width - obstaculos[obstaculos.length-1].x > canvas.width * 0.4))) {
                 let tipo = Math.floor(Math.random()*6);
-                let flote = Math.random() > 0.75;
-                // OBSTÁCULOS AGRANDADOS
-                let tamaño = 100 + Math.random()*20;
+                let flote = Math.random() > 0.8;
+                let tam = 80 + Math.random()*20;
                 obstaculos.push({
                     x: canvas.width,
-                    y: flote ? sueloY - tamaño - 130 : sueloY - tamaño,
-                    w: tamaño, h: tamaño, t: tipo
+                    y: flote ? sueloY - tam - 100 : sueloY - tam,
+                    w: tam, h: tam, t: tipo
                 });
             }
             obstaculos.forEach((o) => {
@@ -219,8 +208,7 @@
                 if(imgsObs[o.t].complete && imgsObs[o.t].naturalWidth !== 0) {
                     ctx.drawImage(imgsObs[o.t], o.x, o.y, o.w, o.h);
                 } else {
-                    ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 4;
-                    ctx.strokeRect(o.x, o.y, o.w, o.h);
+                    ctx.lineWidth = 3; ctx.strokeRect(o.x, o.y, o.w, o.h);
                 }
                 if(checkCol(personaje, o)) fin(false);
             });
@@ -231,11 +219,12 @@
             if(!juegoActivo) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             distancia += velocidad;
-            velocidad = 6 + (distancia/6000);
+            velocidad = 5 + (distancia/5000);
 
+            // Dibujar suelo
             ctx.fillStyle = "#748C2B";
             ctx.fillRect(0, sueloY, canvas.width, canvas.height - sueloY);
-            ctx.strokeStyle = "#000"; ctx.lineWidth = 5;
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 4;
             ctx.beginPath(); ctx.moveTo(0, sueloY); ctx.lineTo(canvas.width, sueloY); ctx.stroke();
 
             personaje.update();
@@ -243,29 +232,28 @@
             manejarObs();
 
             if(distancia >= META_FINAL && !metaObj) {
-                metaObj = { x: canvas.width, y: 0, w: 200, h: sueloY };
+                metaObj = { x: canvas.width, y: 0, w: 150, h: sueloY };
             }
 
             if(metaObj) {
                 metaObj.x -= velocidad;
                 if(imgMeta.complete && imgMeta.naturalWidth !== 0) {
-                    // META AGRANDADA
-                    ctx.drawImage(imgMeta, metaObj.x, sueloY - 250, 250, 250);
+                    ctx.drawImage(imgMeta, metaObj.x, sueloY - 180, 180, 180);
                 }
-                if(personaje.x + personaje.w > metaObj.x + 60) fin(true);
+                if(personaje.x + personaje.w > metaObj.x + 30) fin(true);
             }
             requestAnimationFrame(loop);
         }
 
         function checkCol(p, o) {
-            // Hitboxes ajustadas para el nuevo tamaño
-            return p.x < o.x + o.w - 30 && p.x + p.w - 30 > o.x &&
-                   p.y < o.y + o.h - 25 && p.y + p.h - 25 > o.y;
+            return p.x < o.x + o.w - 25 && p.x + p.w - 25 > o.x &&
+                   p.y < o.y + o.h - 20 && p.y + p.h - 20 > o.y;
         }
 
         function empezarJuego() {
             document.getElementById('pantalla-inicio').style.display = 'none';
             juegoActivo = true;
+            redimensionar();
             loop();
         }
 
@@ -275,12 +263,14 @@
         }
 
         function reiniciar() {
-            distancia = 0; velocidad = 6; obstaculos = []; metaObj = null;
-            personaje.y = 300; personaje.vy = 0; juegoActivo = true;
+            distancia = 0; velocidad = 5; obstaculos = []; metaObj = null;
+            personaje.vy = 0; juegoActivo = true;
             document.getElementById('mensaje-derrota').style.display = 'none';
             loop();
         }
 
+        // Eventos
+        window.addEventListener('resize', redimensionar);
         window.addEventListener('keydown', (e) => { 
             if(e.code === 'Space' || e.code === 'ArrowUp') {
                 if(juegoActivo && personaje.suelo) personaje.vy = personaje.salto;
@@ -292,6 +282,7 @@
             if(juegoActivo && personaje.suelo) personaje.vy = personaje.salto;
         }, {passive: false});
 
+        redimensionar();
     </script>
 </body>
 </html>
