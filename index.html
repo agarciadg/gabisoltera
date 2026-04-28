@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Snoopy's Party Game - Gabi</title>
+    <title>Gabi's BIG Bachelorette Adventure</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
 
@@ -15,7 +15,7 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #f0f0f0;
+            background-color: #fcfaf2; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -28,14 +28,14 @@
         #contenedor-juego {
             position: relative;
             width: 100%;
-            max-width: 800px;
+            max-width: 1000px; /* Un poco más ancho para dar espacio */
             aspect-ratio: 2 / 1;
             margin: 10px;
         }
 
         canvas {
-            background-color: #89CFF0; /* Azul cielo Peanuts */
-            border: 3px solid #000;
+            background-color: #89CFF0; 
+            border: 5px solid #000; /* Borde más grueso */
             border-radius: 4px;
             width: 100%;
             height: 100%;
@@ -43,58 +43,76 @@
             image-rendering: crisp-edges;
         }
 
-        /* Estilo base para todas las pantallas superpuestas */
         .pantalla-mensaje {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
-            max-height: 90%;
-            background: rgba(255, 255, 255, 0.98);
-            padding: 25px;
-            border: 4px solid #000;
-            border-radius: 20px;
+            background: #fff;
+            padding: 30px;
+            border: 5px solid #000;
             text-align: center;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
             z-index: 100;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.2);
+            overflow-y: auto;
+            max-height: 95%;
         }
 
-        h1 { font-size: 1.3rem; margin: 10px 0; text-transform: uppercase; line-height: 1.2; }
-        .info-detalle { font-size: 1.1rem; color: #d32f2f; font-weight: bold; margin: 10px 0; }
-        .subtexto { font-size: 1rem; color: #333; margin-bottom: 10px; }
-        
-        /* Botón estilo cómic */
-        .boton-jugar {
-            background: #ffff00;
-            border: 3px solid #000;
-            padding: 10px 25px;
+        h1 { 
+            font-size: 2rem; /* Texto más grande */
+            margin: 15px 0; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            -webkit-text-stroke: 1.5px #000;
+        }
+
+        p { font-size: 1.3rem; line-height: 1.4; }
+
+        .info-detalle { 
+            font-size: 1.5rem; /* Texto más grande */
+            color: #000; 
+            margin: 20px 0; 
+            padding: 15px;
+            border: 3px dashed #000;
+        }
+
+        .boton-peanuts {
+            background: #FFD200; 
+            border: 4px solid #000;
+            padding: 15px 40px;
             font-family: 'Architects Daughter', cursive;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             font-weight: bold;
             cursor: pointer;
             margin-top: 15px;
+            box-shadow: 6px 6px 0px #000;
             text-transform: uppercase;
         }
 
-        .boton-jugar:active { transform: scale(0.95); }
-
-        #img-game-over { max-width: 80px; margin: 10px auto; }
+        .boton-peanuts:active {
+            transform: translate(3px, 3px);
+            box-shadow: 3px 3px 0px #000;
+        }
 
         .zigzag {
             width: 100%;
-            height: 15px;
-            background: linear-gradient(135deg, transparent 25%, #000 25%, #000 50%, transparent 50%, transparent 75%, #000 75%, #000 100%);
-            background-size: 30px 30px;
+            height: 25px; /* Zigzag más grande */
+            background: 
+                linear-gradient(135deg, transparent 25%, #000 25%, #000 50%, transparent 50%, transparent 75%, #000 75%, #000 100%),
+                linear-gradient(225deg, transparent 25%, #000 25%, #000 50%, transparent 50%, transparent 75%, #000 75%, #000 100%);
+            background-size: 50px 50px;
+            margin: 15px 0;
         }
 
-        @media (max-width: 500px) {
-            h1 { font-size: 1.1rem; }
-            .boton-jugar { padding: 8px 20px; font-size: 1rem; }
+        @media (max-width: 600px) {
+            h1 { font-size: 1.5rem; }
+            p { font-size: 1.1rem; }
+            .info-detalle { font-size: 1.2rem; }
+            .boton-peanuts { font-size: 1.2rem; padding: 10px 30px; }
             #contenedor-juego { aspect-ratio: 4 / 3; }
         }
     </style>
@@ -105,32 +123,29 @@
         <canvas id="juegoCanvas"></canvas>
 
         <div id="pantalla-inicio" class="pantalla-mensaje">
-            <div class="zigzag"></div>
             <h1>¡Hola Gabi!</h1>
-            <p class="subtexto">Supera los obstáculos para llegar a la Meta y tener la info de tu despedida de soltera.</p>
-            <h1 style="color: #000; margin-bottom: 0;">¡Suerte!</h1>
-            <button class="boton-jugar" onclick="empezarJuego()">¡Jugar!</button>
-            <div class="zigzag" style="margin-top:20px"></div>
+            <div class="zigzag"></div>
+            <p>Supera los obstáculos para llegar a la Meta y conocer los detalles de tu despedida.</p>
+            <h1>¡Suerte!</h1>
+            <button class="boton-peanuts" onclick="empezarJuego()">¡Jugar!</button>
         </div>
 
         <div id="mensaje-victoria" class="pantalla-mensaje" style="display: none;">
+            <h1>¡LO LOGRASTE GABI!</h1>
             <div class="zigzag"></div>
-            <h1>¡Felicidades Gabi!</h1>
-            <p class="subtexto">Aquí tienes la información:</p>
             <div class="info-detalle">
-                Viernes 1 de mayo 20 hrs<br>
+                Viernes 1 de mayo • 20:00 hrs<br>
                 Luis Beltrán 1660 depto 302, Ñuñoa.
             </div>
-            <h1 style="background: #ffff00; padding: 5px; border: 2px solid #000; font-size: 1rem;">RECUERDA VENIR DE BLANCO.</h1>
-            <div class="zigzag" style="margin-top:15px"></div>
+            <h1 style="background: #FFD200; padding: 10px; border: 4px solid #000;">VENIR DE BLANCO</h1>
+            <div class="zigzag"></div>
         </div>
 
         <div id="mensaje-derrota" class="pantalla-mensaje" style="display: none;">
             <h1>¡GOOD GRIEF!</h1>
-            <img id="img-game-over" src="derrota.png" alt="Snoopy">
-            <div class="subtexto">¡Estuviste cerca!<br>Inténtalo de nuevo, Gabi.</div>
-            <button class="boton-jugar" onclick="reiniciar()">Reintentar</button>
-            <div class="zigzag" style="margin-top:15px"></div>
+            <img src="derrota.png" alt="" style="max-width: 120px; margin: 15px;" onerror="this.style.display='none'">
+            <p>¡Casi llegas, Gabi!</p>
+            <button class="boton-peanuts" onclick="reiniciar()">Intentar otra vez</button>
         </div>
     </div>
 
@@ -138,14 +153,11 @@
         const canvas = document.getElementById('juegoCanvas');
         const ctx = canvas.getContext('2d');
 
-        function ajustarResolucion() {
-            canvas.width = 800;
-            canvas.height = 400;
-        }
-        ajustarResolucion();
+        // AUMENTO DE RESOLUCIÓN INTERNA
+        canvas.width = 1200;
+        canvas.height = 600;
 
-        // --- IMÁGENES ---
-        const imgPersonaje = new Image(); imgPersonaje.src = 'personaje.png';
+        const imgPers = new Image(); imgPers.src = 'personaje.png';
         const imgMeta = new Image(); imgMeta.src = 'meta.png';
         const imgsObs = [];
         for(let i=1; i<=6; i++) {
@@ -153,22 +165,25 @@
             imgsObs.push(img);
         }
 
-        // --- VARIABLES ---
-        let juegoActivo = false; // Empieza en falso hasta que haga clic en jugar
-        let velocidadJuego = 5.5;
+        let juegoActivo = false;
+        let velocidad = 6; // Un poco más rápido para compensar el tamaño
         let distancia = 0;
-        const META_FINAL = 16000; 
-        const sueloY = 345;
+        const META_FINAL = 25000; // Más distancia porque todo es más grande
+        const sueloY = 520; // Suelo más bajo
 
         const personaje = {
-            x: 60, y: 200, w: 65, h: 65,
-            vy: 0, g: 0.8, salto: -16, suelo: false,
+            // TAMAÑO AGRANDADO (Casi el doble)
+            x: 100, y: 300, w: 110, h: 110,
+            // FÍSICA AJUSTADA PARA EL NUEVO TAMAÑO
+            vy: 0, g: 1.0, salto: -22, suelo: false,
             dibujar() {
-                if(imgPersonaje.complete && imgPersonaje.naturalWidth !== 0) {
-                    ctx.drawImage(imgPersonaje, this.x, this.y, this.w, this.h);
+                if(imgPers.complete && imgPers.naturalWidth !== 0) {
+                    ctx.drawImage(imgPers, this.x, this.y, this.w, this.h);
                 } else {
-                    ctx.fillStyle = "white"; ctx.strokeStyle = "black"; ctx.lineWidth = 3;
-                    ctx.beginPath(); ctx.arc(this.x+32, this.y+32, 28, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 4;
+                    ctx.beginPath(); ctx.ellipse(this.x+55, this.y+55, 50, 40, 0, 0, Math.PI*2);
+                    ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = "#000"; ctx.fillRect(this.x+15, this.y+30, 20, 40); 
                 }
             },
             update() {
@@ -185,22 +200,26 @@
         let obstaculos = [];
         let metaObj = null;
 
-        function manejarObstaculos() {
-            if(distancia > META_FINAL - 1200) return;
-            if(Math.random() < 0.02 && (obstaculos.length === 0 || (canvas.width - obstaculos[obstaculos.length-1].x > 320))) {
+        function manejarObs() {
+            if(distancia > META_FINAL - 2000) return;
+            // Spawning ajustado para objetos más grandes
+            if(Math.random() < 0.02 && (obstaculos.length === 0 || (canvas.width - obstaculos[obstaculos.length-1].x > 500))) {
                 let tipo = Math.floor(Math.random()*6);
                 let flote = Math.random() > 0.75;
+                // OBSTÁCULOS AGRANDADOS
+                let tamaño = 100 + Math.random()*20;
                 obstaculos.push({
                     x: canvas.width,
-                    y: flote ? sueloY - 145 : sueloY - 65,
-                    w: 65, h: 65, t: tipo
+                    y: flote ? sueloY - tamaño - 130 : sueloY - tamaño,
+                    w: tamaño, h: tamaño, t: tipo
                 });
             }
             obstaculos.forEach((o) => {
-                o.x -= velocidadJuego;
+                o.x -= velocidad;
                 if(imgsObs[o.t].complete && imgsObs[o.t].naturalWidth !== 0) {
                     ctx.drawImage(imgsObs[o.t], o.x, o.y, o.w, o.h);
                 } else {
+                    ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 4;
                     ctx.strokeRect(o.x, o.y, o.w, o.h);
                 }
                 if(checkCol(personaje, o)) fin(false);
@@ -211,36 +230,37 @@
         function loop() {
             if(!juegoActivo) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            distancia += velocidadJuego;
-            velocidadJuego = 5.5 + (distancia/5500);
+            distancia += velocidad;
+            velocidad = 6 + (distancia/6000);
 
-            // Dibujar Pasto
             ctx.fillStyle = "#748C2B";
             ctx.fillRect(0, sueloY, canvas.width, canvas.height - sueloY);
-            ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 5;
             ctx.beginPath(); ctx.moveTo(0, sueloY); ctx.lineTo(canvas.width, sueloY); ctx.stroke();
 
             personaje.update();
             personaje.dibujar();
-            manejarObstaculos();
+            manejarObs();
 
             if(distancia >= META_FINAL && !metaObj) {
-                metaObj = { x: canvas.width, y: 0, w: 120, h: sueloY };
+                metaObj = { x: canvas.width, y: 0, w: 200, h: sueloY };
             }
 
             if(metaObj) {
-                metaObj.x -= velocidadJuego;
+                metaObj.x -= velocidad;
                 if(imgMeta.complete && imgMeta.naturalWidth !== 0) {
-                    ctx.drawImage(imgMeta, metaObj.x, sueloY - 140, 140, 140);
+                    // META AGRANDADA
+                    ctx.drawImage(imgMeta, metaObj.x, sueloY - 250, 250, 250);
                 }
-                if(personaje.x + personaje.w > metaObj.x + 30) fin(true);
+                if(personaje.x + personaje.w > metaObj.x + 60) fin(true);
             }
             requestAnimationFrame(loop);
         }
 
         function checkCol(p, o) {
-            return p.x < o.x + o.w - 20 && p.x + p.w - 20 > o.x &&
-                   p.y < o.y + o.h - 15 && p.y + p.h - 15 > o.y;
+            // Hitboxes ajustadas para el nuevo tamaño
+            return p.x < o.x + o.w - 30 && p.x + p.w - 30 > o.x &&
+                   p.y < o.y + o.h - 25 && p.y + p.h - 25 > o.y;
         }
 
         function empezarJuego() {
@@ -255,30 +275,22 @@
         }
 
         function reiniciar() {
-            distancia = 0; velocidadJuego = 5.5; obstaculos = []; metaObj = null;
-            personaje.y = 200; personaje.vy = 0; juegoActivo = true;
-            document.getElementById('mensaje-victoria').style.display = 'none';
+            distancia = 0; velocidad = 6; obstaculos = []; metaObj = null;
+            personaje.y = 300; personaje.vy = 0; juegoActivo = true;
             document.getElementById('mensaje-derrota').style.display = 'none';
             loop();
         }
 
-        // --- CONTROLES ---
         window.addEventListener('keydown', (e) => { 
             if(e.code === 'Space' || e.code === 'ArrowUp') {
                 if(juegoActivo && personaje.suelo) personaje.vy = personaje.salto;
             }
         });
 
-        // Toque en el canvas para saltar
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             if(juegoActivo && personaje.suelo) personaje.vy = personaje.salto;
         }, {passive: false});
-
-        // Para evitar que el botón de "¡Jugar!" haga saltar al personaje al mismo tiempo
-        document.querySelectorAll('.boton-jugar').forEach(btn => {
-            btn.addEventListener('touchstart', (e) => e.stopPropagation());
-        });
 
     </script>
 </body>
