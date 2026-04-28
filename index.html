@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Despedida de Soltera Game - Estilo Schulz</title>
+    <style>
+        /* Importamos una fuente estilo cómic dibujado a mano */
+        @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0; /* Fondo de la página neutro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Architects Daughter', cursive;
+            overflow: hidden;
+        }
+
+        canvas {
+            /* COLORES DE LA IMAGEN DE REFERENCIA */
+            background-color: #89CFF0; /* Azul cielo claro de Peanuts */
+            
+            /* BORDE ESTILO DIBUJO DE CÓMIC */
+            border: 3px solid #000; /* Línea negra nítida como en los cómics */
+            border-radius: 4px;
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.1); /* Sombra plana */
+
+            /* Mejora la resolución de las imágenes para que se vean nítidas */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        .pantalla-mensaje {
+            position: absolute;
+            text-align: center;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 30px;
+            border: 3px solid #000; /* Borde de cómic */
+            border-radius: 15px;
+            max-width: 80%;
+            box-shadow: 0 0 30px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+
+        #mensaje-victoria { color: #000; }
+        #mensaje-derrota { color: #000; }
+
+        h1 { font-size: 26px; margin: 10px 0; line-height: 1.3; text-transform: uppercase; }
+        .info-detalle { font-size: 20px; color: #d32f2f; font-weight: bold; margin: 15px 0; border-y: 2px solid #000; padding: 10px 0;}
+        .subtexto { font-size: 17px; color: #333; }
+        
+        #img-game-over { max-width: 100px; margin: 15px 0; }
+
+        /* Línea zigzag icónica de la camiseta de Charlie Brown */
+        .zigzag {
+            width: 100%;
+            height: 15px;
+            background: linear-gradient(135deg, transparent 25%, #000 25%, #000 50%, transparent 50%, transparent 75%, #000 75%, #000 100%);
+            background-size: 30px 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="juegoCanvas" width="800" height="400"></canvas>
+
+    <div id="mensaje-victoria" class="pantalla-mensaje">
+        <div class="zigzag"></div>
+        <h1>¡Felicidades! Aquí tienes la información de tu despedida de soltera:</h1>
+        <div class="info-detalle">
+            Viernes 1 de mayo 20 hrs<br>
+            en Luis Beltrán 1660 depto 302, Ñuñoa.
+        </div>
+        <h1 style="color: #000; background: #ffff00; padding: 5px; border: 2px solid #000;">RECUERDA VENIR DE BLANCO.</h1>
+        <div class="subtexto">¡Te esperamos para celebrar!</div>
+        <div class="zigzag" style="margin-top:20px"></div>
+    </div>
+
+    <div id="mensaje-derrota" class="pantalla-mensaje">
+        <div class="zigzag"></div>
+        <h1>¡GOOD GRIEF!</h1>
+        <img id="img-game-over" src="derrota.png" alt="Snoopy" onerror="this.style.display='none'">
+        <div class="subtexto">¡Estuviste cerca de la fiesta!<br>Presiona espacio para reintentar</div>
+        <div class="zigzag" style="margin-top:15px"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('juegoCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- IMÁGENES PNG (Estilo hand-drawn recomendado) ---
+        const imgPersonaje = new Image(); imgPersonaje.src = 'personaje.png';
+        const imgMeta = new Image(); imgMeta.src = 'meta.png';
+        const imgsObs = [];
+        for(let i=1; i<=6; i++) {
+            let img = new Image(); img.src = `obs${i}.png`;
+            imgsObs.push(img);
+        }
+
+        // --- VARIABLES DEL JUEGO ---
+        let juegoActivo = true;
+        let velocidadJuego = 6;
+        let distancia = 0;
+        const META_FINAL = 20000; // Trayecto largo para > 20 saltos
+        const sueloY = 345; // Altura del pasto
+
+        const personaje = {
+            x: 80, y: 200, w: 65, h: 65, 
+            vy: 0, g: 0.7, salto: -16, suelo: false,
+            dibujar() {
+                if(imgPersonaje.complete && imgPersonaje.naturalWidth !== 0) {
+                    ctx.drawImage(imgPersonaje, this.x, this.y, this.w, this.h);
+                } else {
+                    // Placeholder estilo Snoopy minimalista
+                    ctx.fillStyle = "white"; ctx.strokeStyle = "black"; ctx.lineWidth = 3;
+                    ctx.beginPath(); ctx.ellipse(this.x+32, this.y+32, 28, 22, 0, 0, Math.PI*2);
+                    ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = "black"; ctx.fillRect(this.x+10, this.y+20, 10, 20); // Oreja
+                }
+            },
+            update() {
+                this.vy += this.g;
+                this.y += this.vy;
+                if(this.y + this.h > sueloY) {
+                    this.y = sueloY - this.h;
+                    this.vy = 0;
+                    this.suelo = true;
+                } else { this.suelo = false; }
+            }
+        };
+
+        let obstaculos = [];
+        let metaObj = null;
+
+        function spawnObs() {
+            if(distancia > META_FINAL - 1200) return;
+            if(Math.random() < 0.02) {
+                let ultimo = obstaculos[obstaculos.length-1];
+                if(ultimo && canvas.width - ultimo.x < 350) return;
+
+                let tipo = Math.floor(Math.random()*6);
+                let flote = Math.random() > 0.7; // 30% flotantes
+                let h = 55 + Math.random()*20;
+                let w = 55 + Math.random()*20;
+                
+                obstaculos.push({
+                    x: canvas.width,
+                    y: flote ? sueloY - h - 85 : sueloY - h,
+                    w: w, h: h, t: tipo
+                });
+            }
+        }
+
+        function dibujarSuelo() {
+            // COLOR DE PASTO DE LA IMAGEN DE REFERENCIA
+            ctx.fillStyle = "#748C2B"; // Verde oliva/seco de Peanuts
+            ctx.fillRect(0, sueloY, canvas.width, canvas.height - sueloY);
+
+            // Línea de borde del pasto estilo dibujo a mano
+            ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, sueloY);
+            for(let i=0; i<canvas.width; i+=15) {
+                // Pequeña variación para que no sea una línea recta perfecta
+                ctx.lineTo(i, sueloY + (Math.sin(i + distancia/30)*1.5));
+            }
+            ctx.lineTo(canvas.width, sueloY);
+            ctx.stroke();
+        }
+
+        function loop() {
+            if(!juegoActivo) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            distancia += velocidadJuego;
+            velocidadJuego = 6 + (distancia/4500); // Aumento de velocidad progresivo
+
+            dibujarSuelo();
+            personaje.update();
+            personaje.dibujar();
+
+            spawnObs();
+
+            // META (Imposible de saltar)
+            if(distancia >= META_FINAL && !metaObj) {
+                metaObj = { x: canvas.width, y: 0, w: 150, h: sueloY }; // Cubre todo el alto del juego
+            }
+
+            if(metaObj) {
+                metaObj.x -= velocidadJuego;
+                if(imgMeta.complete && imgMeta.naturalWidth !== 0) {
+                    ctx.drawImage(imgMeta, metaObj.x, sueloY - 150, 150, 150);
+                } else {
+                    // Placeholder de meta
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.strokeStyle="#000"; ctx.lineWidth=2;
+                    ctx.fillRect(metaObj.x, 0, metaObj.w, sueloY);
+                    ctx.strokeRect(metaObj.x, 0, metaObj.w, sueloY);
+                    ctx.fillStyle="#000"; ctx.font="20px Architects Daughter"; ctx.fillText("META", metaObj.x+50, sueloY/2);
+                }
+                
+                // Colisión con meta: ganas al tocar el borde
+                if(personaje.x + personaje.w > metaObj.x + 20) fin(true);
+            }
+
+            // OBSTÁCULOS
+            obstaculos.forEach((o) => {
+                o.x -= velocidadJuego;
+                if(imgsObs[o.t].complete && imgsObs[o.t].naturalWidth !== 0) {
+                    ctx.drawImage(imgsObs[o.t], o.x, o.y, o.w, o.h);
+                } else {
+                    // Placeholder con borde de cómic
+                    ctx.fillStyle = "#eee"; ctx.strokeStyle="#000"; ctx.lineWidth=3;
+                    ctx.fillRect(o.x, o.y, o.w, o.h);
+                    ctx.strokeRect(o.x, o.y, o.w, o.h);
+                }
+                if(checkCol(personaje, o)) fin(false);
+            });
+
+            obstaculos = obstaculos.filter(o => o.x + o.w > 0);
+            requestAnimationFrame(loop);
+        }
+
+        function checkCol(p, o) {
+            // Hitbox ajustada para ser justa con el estilo visual
+            return p.x < o.x + o.w - 18 && p.x + p.w - 18 > o.x &&
+                   p.y < o.y + o.h - 12 && p.y + p.h - 12 > o.y;
+        }
+
+        function fin(ganaste) {
+            juegoActivo = false;
+            document.getElementById(ganaste ? 'mensaje-victoria' : 'mensaje-derrota').style.display = 'flex';
+        }
+
+        function reiniciar() {
+            distancia = 0; velocidadJuego = 6; obstaculos = []; metaObj = null;
+            personaje.y = 200; personaje.vy = 0; juegoActivo = true;
+            document.getElementById('mensaje-victoria').style.display = 'none';
+            document.getElementById('mensaje-derrota').style.display = 'none';
+            loop();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if(e.code === 'Space' || e.code === 'ArrowUp') {
+                e.preventDefault(); // Evita que la página baje al pulsar espacio
+                if(juegoActivo) {
+                    if(personaje.suelo) personaje.vy = personaje.salto;
+                } else if(document.getElementById('mensaje-derrota').style.display === 'flex') {
+                    reiniciar();
+                }
+            }
+        });
+
+        // Soporte táctil básico
+        window.addEventListener('touchstart', (e) => {
+             if(juegoActivo) {
+                if(personaje.suelo) personaje.vy = personaje.salto;
+            } else if(document.getElementById('mensaje-derrota').style.display === 'flex') {
+                reiniciar();
+            }
+        });
+
+        loop();
+    </script>
+</body>
+</html>
