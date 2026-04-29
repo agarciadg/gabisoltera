@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Gabi's Adventure</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
         * { box-sizing: border-box; touch-action: manipulation; }
@@ -50,7 +52,7 @@
         <div id="pantalla-inicio" class="pantalla-mensaje">
             <div class="zigzag"></div>
             <h1>¡Hola Gabi!</h1>
-            <p>Te tenemos una invitación. Supera los obstáculos para descubrirla. ¡Suerte!</p>
+            <p>Supera los obstáculos para llegar a la Meta.</p>
             <button class="boton-peanuts" onclick="empezarJuego()">¡Jugar!</button>
             <div class="zigzag"></div>
         </div>
@@ -232,7 +234,7 @@
         }
 
         function reiniciar() {
-            distancia = 0; velocidad = 5.5; obstaculos = []; metaObj = null;
+            distancia = 0; velocidad = 5.7; obstaculos = [20]; metaObj = null;
             victoriaFinalizada = false; saltosCelebracion = 0; confeti = [];
             personaje.vy = 0; juegoActivo = true;
             document.getElementById('mensaje-derrota').style.display = 'none';
