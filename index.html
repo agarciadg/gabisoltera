@@ -3,21 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Gabi's Adventure</title>
+    
+    <title>¡Gabi Soltera, a jugar!</title>
+    <meta property="og:title" content="¡Gabi Soltera, a jugar!">
+    <meta property="og:description" content="¡Supera los obstáculos para ver tu invitación!">
+    <meta property="og:image" content="https://tu-web.com/miniatura.png">
+    <meta property="og:type" content="website">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
+        
         * { box-sizing: border-box; touch-action: manipulation; }
+        
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             background-color: #fcfaf2; display: flex; justify-content: center; align-items: center;
             font-family: 'Architects Daughter', cursive; overflow: hidden;
+            position: fixed; 
         }
-        #contenedor-juego { position: relative; width: 100vw; height: 100vh; background-color: #89CFF0; }
-        canvas { display: block; image-rendering: auto; width: 100%; height: 100%; }
+
+        #contenedor-juego { 
+            position: relative; 
+            width: 100vw; 
+            height: 100vh; 
+            background-color: #89CFF0; 
+            overflow: hidden;
+        }
+
+        canvas { 
+            display: block; 
+            width: 100%; 
+            height: 100%; 
+        }
         
         .pantalla-mensaje {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; max-width: 420px; background: #fff; padding: 25px; border: 4px solid #000;
+            width: 85%; max-width: 400px; background: #fff; padding: 25px; border: 4px solid #000;
             text-align: center; display: flex; flex-direction: column; align-items: center; z-index: 100;
             box-shadow: 8px 8px 0px rgba(0,0,0,0.2);
         }
@@ -36,6 +57,7 @@
             background: linear-gradient(135deg, transparent 25%, #000 25%, #000 50%, transparent 50%, transparent 75%, #000 75%, #000 100%);
             background-size: 30px 30px; margin: 10px 0;
         }
+
         #aliento {
             position: absolute; top: 15%; width: 100%; text-align: center;
             font-size: 1.5rem; font-weight: bold; color: #000; display: none;
@@ -52,7 +74,7 @@
         <div id="pantalla-inicio" class="pantalla-mensaje">
             <div class="zigzag"></div>
             <h1>¡Hola Gabi!</h1>
-            <p>Supera los obstáculos para llegar a la Meta.</p>
+            <p>Te tenemos una invitación. Supera los obstáculos para descubrirla. ¡Suerte!</p>
             <button class="boton-peanuts" onclick="empezarJuego()">¡Jugar!</button>
             <div class="zigzag"></div>
         </div>
@@ -80,7 +102,7 @@
         const ctx = canvas.getContext('2d');
         const alientoTxt = document.getElementById('aliento');
 
-        // Carga de imágenes simple
+        // Imágenes
         const imgs = {};
         const cargar = (n) => { 
             imgs[n] = new Image(); 
@@ -100,13 +122,13 @@
         const META_FINAL = 16000;
 
         const personaje = {
-            x: 60, y: 0, w: 90, h: 90, vy: 0, g: 0.8, salto: -18, suelo: false,
+            x: 60, y: 0, w: 85, h: 85, vy: 0, g: 0.8, salto: -18, suelo: false,
             dibujar() {
                 if (imgs.personaje.complete && imgs.personaje.naturalWidth > 0) {
                     ctx.drawImage(imgs.personaje, this.x, this.y, this.w, this.h);
                 } else {
                     ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
-                    ctx.beginPath(); ctx.arc(this.x+45, this.y+45, 40, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(this.x+42, this.y+42, 35, 0, Math.PI*2); ctx.fill(); ctx.stroke();
                 }
             },
             update() {
@@ -131,6 +153,7 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             sueloY = canvas.height * 0.82;
+            if (!juegoActivo) personaje.y = sueloY - personaje.h;
         }
 
         function manejarObstaculos() {
@@ -140,10 +163,10 @@
             }
             alientoTxt.style.display = 'none';
 
-            if (obstaculos.length === 0 || (canvas.width - obstaculos[obstaculos.length-1].x > 500)) {
+            if (obstaculos.length === 0 || (canvas.width - obstaculos[obstaculos.length-1].x > 450)) {
                 if (Math.random() < 0.02) {
                     let num = Math.floor(Math.random() * 6) + 1;
-                    let tam = 85 + Math.random() * 25;
+                    let tam = 80 + Math.random() * 20;
                     obstaculos.push({ x: canvas.width, y: sueloY - tam, w: tam, h: tam, img: imgs['obs'+num] });
                 }
             }
@@ -157,8 +180,7 @@
                     ctx.fillStyle = "#FFD200"; ctx.strokeRect(o.x, o.y, o.w, o.h);
                 }
                 
-                // Colisión
-                let m = 28;
+                let m = 25;
                 if (personaje.x + m < o.x + o.w - m && personaje.x + personaje.w - m > o.x + m &&
                     personaje.y + m < o.y + o.h - m && personaje.y + personaje.h - m > o.y + m) {
                     fin();
@@ -176,7 +198,6 @@
                 velocidad = 5.5 + (distancia / 8000);
             }
 
-            // Suelo verde
             ctx.fillStyle = "#748C2B";
             ctx.fillRect(0, sueloY, canvas.width, canvas.height - sueloY);
             ctx.strokeStyle = "#000"; ctx.lineWidth = 5;
@@ -187,7 +208,6 @@
 
             if (!victoriaFinalizada) manejarObstaculos();
 
-            // Meta
             if (distancia >= META_FINAL && !metaObj) {
                 metaObj = { x: canvas.width, y: sueloY - 240, w: 240, h: 240 };
             }
@@ -201,7 +221,6 @@
                 }
             }
 
-            // Confeti
             confeti.forEach(p => {
                 ctx.fillStyle = p.color;
                 ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
@@ -234,7 +253,7 @@
         }
 
         function reiniciar() {
-            distancia = 0; velocidad = 5.7; obstaculos = [20]; metaObj = null;
+            distancia = 0; velocidad = 5.5; obstaculos = []; metaObj = null;
             victoriaFinalizada = false; saltosCelebracion = 0; confeti = [];
             personaje.vy = 0; juegoActivo = true;
             document.getElementById('mensaje-derrota').style.display = 'none';
